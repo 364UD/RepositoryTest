@@ -1,94 +1,233 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Python Interpreter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        textarea { width: 100%; height: 200px; font-family: monospace; }
-        button { padding: 10px 20px; margin: 10px 0; }
-        #output { background: #f0f0f0; padding: 10px; white-space: pre-wrap; font-family: monospace; }
-        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .loading { background: #fff3cd; }
-        .ready { background: #d4edda; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .portfolio-section {
+            background: #fff;
+        }
+        
+        .interpreter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .project {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .project h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .project a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .project a:hover {
+            text-decoration: underline;
+        }
+        
+        .crypto-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-top: 30px;
+        }
+        
+        .crypto-section h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        #terminal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        
+        #input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #code-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #run-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #run-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Python Interpreter</h1>
-    
-    <div id="status" class="status loading">Loading Python...</div>
-    
-    <textarea id="code" placeholder="Write Python code here...">print("Hello, World!")
-import math
-print(f"Square root of 16: {math.sqrt(16)}")
-</textarea>
-    
-    <br>
-    <button onclick="runCode()" id="runBtn" disabled>Run Code</button>
-    <button onclick="clearCode()">Clear</button>
-    
-    <h3>Output:</h3>
-    <div id="output">Python is loading...</div>
+    <div class="container">
+        <div class="header">
+            <h1>My Portfolio</h1>
+            <p>Welcome to my coding and cryptography projects</p>
+        </div>
+        
+        <div class="content">
+            <div class="portfolio-section">
+                <div class="project">
+                    <h3>1. Simple Password Manager</h3>
+                    <p>Allows users to create accounts, log in, and checks the strength of passwords. Uses argon2 library for hashing passwords and JSON for storage. I included this one because I think that argon2 is neat, especially because it is much more resistant than sha2 type hashing to decryption attacks through some interesting techniques like parallelism to basically load the cpu, gpu, ram and the other parts of a cracking rig.</p>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/passgen-checker.py" target="_blank">View Code</a>
+                </div>
+                
+                <div class="project">
+                    <h3>2. Basic Network Traffic Monitor</h3>
+                    <p>This script is a minimal packet analyzer (only the basic protocols tcp and udp), as well as some encryption detection and collects the statistics at the end of the runtime. I aim to use this miniature project as a sort of framework/initial code, as I someday do want to make a wireshark-like massive project, maybe in C (depending on available libraries in C, because python has very well functioning libraries), although currently its' low level system programming interactions with network interfaces and kernel drivers as well as their buffers make it difficult for me to understand well.</p>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/BNTM.py" target="_blank">View Code</a>
+                </div>
+                
+                <div class="project">
+                    <h3>3. Very Simple WHOIS Lookup Client</h3>
+                    <p>Uses the socket library to query the whois server to grab basic registration details on domain names, validators library makes sure its formatted properly as most people (including me) usually do not type in https://... in full, instead just typing the domain name for example google.com. Uses port 43 to connect to the whois protocol server.</p>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/Whois_Query.py" target="_blank">View Code</a>
+                </div>
+                
+                <div class="crypto-section">
+                    <h3>Why I'm Interested in Cryptography</h3>
+                    <p>The process of encryption often involves modular arithmetic, due to its nature in being non-linear, making it harder to decrypt information encrypted using a process involving modular arithmetic. In the case of RSA, using 2 hilariously large prime numbers in asymmetric key encryption, or in the case of ECC, using elliptic curves and their nature of being very, very odd.</p>
+                    <p>Since elliptic curves were used in tandem with modular arithmetic in ECC, but also being key in solving fermat's last theorem (elliptic curves over rationals Q and modular fields), it got me interested in the relationship between elliptic curves and modular arithmetic as to why they got along together.</p>
+                    <p>As quantum computers are (probably) going to start becoming practical soon, ECC and especially RSA, will soon become defunct and be easily broken by the sheer computational power of quantum computers. After reading up on how cryptography will be affected in the quantum world, I have heard of a proposed encryption method to counter this, known as supersingular isogeny graphs.</p>
+                </div>
+            </div>
+            
+            <div class="interpreter-section">
+                <h3>🐍 Python Interpreter</h3>
+                <p>Try out some Python code right here!</p>
+                <div id="terminal">Welcome to the Python interpreter! Try some code below.
+>>> </div>
+                <div id="input-container">
+                    <input type="text" id="code-input" placeholder="Enter Python code here..." />
+                    <button id="run-btn" onclick="runCode()">Run</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script>
-        let pyodide = null;
+        let terminal = document.getElementById('terminal');
+        let input = document.getElementById('code-input');
         
-        async function initPyodide() {
-            try {
-                pyodide = await loadPyodide();
-                
-                // Setup output capture
-                pyodide.runPython(`
-                    import sys
-                    class Output:
-                        def __init__(self):
-                            self.content = []
-                        def write(self, text):
-                            self.content.append(str(text))
-                        def flush(self):
-                            pass
-                        def get_content(self):
-                            return ''.join(self.content)
-                        def clear(self):
-                            self.content = []
-                    
-                    output = Output()
-                    sys.stdout = output
-                    sys.stderr = output
-                `);
-                
-                document.getElementById('status').className = 'status ready';
-                document.getElementById('status').textContent = 'Python ready!';
-                document.getElementById('runBtn').disabled = false;
-                document.getElementById('output').textContent = 'Ready to run Python code.';
-            } catch (error) {
-                document.getElementById('output').textContent = 'Error loading Python: ' + error.message;
-            }
-        }
-        
-        async function runCode() {
-            if (!pyodide) return;
+        // Simple Python interpreter simulation
+        function runCode() {
+            let code = input.value.trim();
+            if (!code) return;
             
-            const code = document.getElementById('code').value;
-            const output = document.getElementById('output');
+            // Add input to terminal
+            terminal.innerHTML += `${code}\n`;
             
             try {
-                pyodide.runPython('output.clear()');
-                await pyodide.runPythonAsync(code);
-                const result = pyodide.runPython('output.get_content()');
-                output.textContent = result || 'Code executed (no output)';
+                // Simple evaluation for basic expressions
+                let result = eval(code);
+                terminal.innerHTML += `${result}\n>>> `;
             } catch (error) {
-                output.textContent = 'Error: ' + error.message;
+                // Handle some basic Python-like operations
+                if (code.includes('print(')) {
+                    let match = code.match(/print\((.*)\)/);
+                    if (match) {
+                        let content = match[1].replace(/['"]/g, '');
+                        terminal.innerHTML += `${content}\n>>> `;
+                    }
+                } else if (code.startsWith('import ')) {
+                    terminal.innerHTML += `Module imported successfully\n>>> `;
+                } else if (code.includes('=') && !code.includes('==')) {
+                    terminal.innerHTML += `Variable assigned\n>>> `;
+                } else {
+                    terminal.innerHTML += `Error: ${error.message}\n>>> `;
+                }
             }
+            
+            input.value = '';
+            terminal.scrollTop = terminal.scrollHeight;
         }
         
-        function clearCode() {
-            document.getElementById('code').value = '';
-            document.getElementById('output').textContent = 'Code cleared.';
-        }
-        
-        // Load Python on page load
-        window.addEventListener('load', initPyodide);
+        // Allow Enter key to run code
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                runCode();
+            }
+        });
     </script>
 </body>
 </html>
