@@ -140,8 +140,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>My Portfolio</h1>
-            <p>Welcome to my coding and cryptography projects</p>
+            <h1>Portfolio</h1>
+            <p>Projects & Other stuff</p>
         </div>
         
         <div class="content">
@@ -149,28 +149,19 @@
                 <div class="project">
                     <h3>1. Simple Password Manager</h3>
                     <p>Allows users to create accounts, log in, and checks the strength of passwords. Uses argon2 library for hashing passwords and JSON for storage. I included this one because I think that argon2 is neat, especially because it is much more resistant than sha2 type hashing to decryption attacks through some interesting techniques like parallelism to basically load the cpu, gpu, ram and the other parts of a cracking rig.</p>
-                    <div class="project-actions">
-                        <button class="run-project-btn" onclick="runProject('password-manager')">Run Demo</button>
-                        <a href="https://github.com/364UD/Portfolio/blob/main/passgen-checker.py" target="_blank">View Code</a>
-                    </div>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/passgen-checker.py" target="_blank">View Code</a>
                 </div>
                 
                 <div class="project">
                     <h3>2. Basic Network Traffic Monitor</h3>
                     <p>This script is a minimal packet analyzer (only the basic protocols tcp and udp), as well as some encryption detection and collects the statistics at the end of the runtime. I aim to use this miniature project as a sort of framework/initial code, as I someday do want to make a wireshark-like massive project, maybe in C (depending on available libraries in C, because python has very well functioning libraries), although currently its' low level system programming interactions with network interfaces and kernel drivers as well as their buffers make it difficult for me to understand well.</p>
-                    <div class="project-actions">
-                        <button class="run-project-btn" onclick="runProject('network-monitor')">Run Demo</button>
-                        <a href="https://github.com/364UD/Portfolio/blob/main/BNTM.py" target="_blank">View Code</a>
-                    </div>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/BNTM.py" target="_blank">View Code</a>
                 </div>
                 
                 <div class="project">
                     <h3>3. Very Simple WHOIS Lookup Client</h3>
                     <p>Uses the socket library to query the whois server to grab basic registration details on domain names, validators library makes sure its formatted properly as most people (including me) usually do not type in https://... in full, instead just typing the domain name for example google.com. Uses port 43 to connect to the whois protocol server.</p>
-                    <div class="project-actions">
-                        <button class="run-project-btn" onclick="runProject('whois-client')">Run Demo</button>
-                        <a href="https://github.com/364UD/Portfolio/blob/main/Whois_Query.py" target="_blank">View Code</a>
-                    </div>
+                    <a href="https://github.com/364UD/Portfolio/blob/main/Whois_Query.py" target="_blank">View Code</a>
                 </div>
                 
                 <div class="crypto-section">
