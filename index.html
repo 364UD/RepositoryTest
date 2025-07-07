@@ -70,6 +70,32 @@
             text-decoration: underline;
         }
         
+        .project-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .copy-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .copy-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
         .crypto-section {
             background: #fff3cd;
             padding: 20px;
@@ -195,19 +221,28 @@
                 <div class="project">
                     <h3>1. Simple Password Manager</h3>
                     <p>Allows users to create accounts, log in, and checks the strength of passwords. Uses argon2 library for hashing passwords and JSON for storage. I included this one because I think that argon2 is neat, especially because it is much more resistant than sha2 type hashing to decryption attacks through some interesting techniques like parallelism to basically load the cpu, gpu, ram and the other parts of a cracking rig.</p>
-                    <a href="https://github.com/364UD/Portfolio/blob/main/passgen-checker.py" target="_blank">View Code</a>
+                    <div class="project-buttons">
+                        <a href="https://github.com/364UD/Portfolio/blob/main/passgen-checker.py" target="_blank">View Code</a>
+                        <button class="copy-btn" onclick="copyCodeToInterpreter('passgen-checker')" disabled>Copy to Interpreter</button>
+                    </div>
                 </div>
                 
                 <div class="project">
                     <h3>2. Basic Network Traffic Monitor</h3>
                     <p>This script is a minimal packet analyzer (only the basic protocols tcp and udp), as well as some encryption detection and collects the statistics at the end of the runtime. I aim to use this miniature project as a sort of framework/initial code, as I someday do want to make a wireshark-like massive project, maybe in C (depending on available libraries in C, because python has very well functioning libraries), although currently its' low level system programming interactions with network interfaces and kernel drivers as well as their buffers make it difficult for me to understand well.</p>
-                    <a href="https://github.com/364UD/Portfolio/blob/main/BNTM.py" target="_blank">View Code</a>
+                    <div class="project-buttons">
+                        <a href="https://github.com/364UD/Portfolio/blob/main/BNTM.py" target="_blank">View Code</a>
+                        <button class="copy-btn" onclick="copyCodeToInterpreter('BNTM')" disabled>Copy to Interpreter</button>
+                    </div>
                 </div>
                 
                 <div class="project">
                     <h3>3. Very Simple WHOIS Lookup Client</h3>
                     <p>Uses the socket library to query the whois server to grab basic registration details on domain names, validators library makes sure its formatted properly as most people (including me) usually do not type in https://... in full, instead just typing the domain name for example google.com. Uses port 43 to connect to the whois protocol server.</p>
-                    <a href="https://github.com/364UD/Portfolio/blob/main/Whois_Query.py" target="_blank">View Code</a>
+                    <div class="project-buttons">
+                        <a href="https://github.com/364UD/Portfolio/blob/main/Whois_Query.py" target="_blank">View Code</a>
+                        <button class="copy-btn" onclick="copyCodeToInterpreter('whois')" disabled>Copy to Interpreter</button>
+                    </div>
                 </div>
                 
                 <div class="crypto-section">
@@ -250,7 +285,15 @@ plt.show()"></textarea>
         let terminal = document.getElementById('terminal');
         let input = document.getElementById('code-input');
         let runBtn = document.getElementById('run-btn');
+        let copyBtns = document.querySelectorAll('.copy-btn');
         let pyodide = null;
+        
+        // GitHub raw URLs for your projects
+        const projectUrls = {
+            'passgen-checker': 'https://raw.githubusercontent.com/364UD/Portfolio/main/passgen-checker.py',
+            'BNTM': 'https://raw.githubusercontent.com/364UD/Portfolio/main/BNTM.py',
+            'whois': 'https://raw.githubusercontent.com/364UD/Portfolio/main/Whois_Query.py'
+        };
         
         // Initialize Pyodide
         async function initPyodide() {
@@ -263,6 +306,9 @@ plt.show()"></textarea>
                 
                 terminal.innerHTML = "Python interpreter ready! Try some code below.\n>>> ";
                 runBtn.disabled = false;
+                
+                // Enable copy buttons
+                copyBtns.forEach(btn => btn.disabled = false);
                 
                 // Setup stdout/stderr capture
                 pyodide.runPython(`
@@ -294,6 +340,35 @@ _stderr_capture = OutputCapture()
                 terminal.innerHTML = `Error loading Python interpreter: ${error.message}\n>>> `;
                 console.error(error);
             }
+        }
+        
+        // Copy code from GitHub to interpreter
+        async function copyCodeToInterpreter(projectName) {
+            const url = projectUrls[projectName];
+            if (!url) return;
+            
+            try {
+                terminal.innerHTML += `<span class="loading">Fetching ${projectName} code...</span>\n`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch: ${response.status}`);
+                }
+                
+                const code = await response.text();
+                input.value = code;
+                
+                terminal.innerHTML += `<span class="success">Code from ${projectName} copied to editor!</span>\n>>> `;
+                
+                // Scroll to the code input area
+                input.scrollIntoView({ behavior: 'smooth' });
+                input.focus();
+                
+            } catch (error) {
+                terminal.innerHTML += `<span class="error">Failed to fetch ${projectName}: ${error.message}</span>\n>>> `;
+            }
+            
+            terminal.scrollTop = terminal.scrollHeight;
         }
         
         // Run Python code
