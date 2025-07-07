@@ -93,22 +93,31 @@
             height: 300px;
             overflow-y: auto;
             margin-bottom: 10px;
+            white-space: pre-wrap;
         }
         
         #input-container {
             display: flex;
+            flex-direction: column;
             gap: 10px;
         }
         
         #code-input {
-            flex: 1;
+            width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
+            min-height: 100px;
+            resize: vertical;
         }
         
-        #run-btn {
+        .button-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #run-btn, #clear-btn, #install-btn {
             padding: 10px 20px;
             background: #667eea;
             color: white;
@@ -118,8 +127,45 @@
             font-weight: bold;
         }
         
-        #run-btn:hover {
+        #run-btn:hover, #clear-btn:hover, #install-btn:hover {
             background: #5a6fd8;
+        }
+        
+        #clear-btn {
+            background: #dc3545;
+        }
+        
+        #clear-btn:hover {
+            background: #c82333;
+        }
+        
+        #install-btn {
+            background: #28a745;
+        }
+        
+        #install-btn:hover {
+            background: #218838;
+        }
+        
+        #package-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .loading {
+            color: #ffc107;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .success {
+            color: #28a745;
         }
         
         @media (max-width: 768px) {
@@ -173,24 +219,85 @@
             </div>
             
             <div class="interpreter-section">
-                <h3>🐍 Python Interpreter</h3>
-                <p>Try out some Python code right here!</p>
-                <div id="terminal">Welcome to the Python interpreter! Try some code below.
->>> </div>
+                <h3>🐍 Python Interpreter (Pyodide)</h3>
+                <p>Try out Python code with full library support!</p>
+                <div id="terminal">Loading Python interpreter... Please wait.</div>
                 <div id="input-container">
-                    <input type="text" id="code-input" placeholder="Enter Python code here..." />
-                    <button id="run-btn" onclick="runCode()">Run</button>
+                    <textarea id="code-input" placeholder="Enter Python code here...
+Try:
+import numpy as np
+import matplotlib.pyplot as plt
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+plt.plot(x, y)
+plt.title('Sine Wave')
+plt.show()"></textarea>
+                    <div class="button-row">
+                        <button id="run-btn" onclick="runCode()" disabled>Run Code</button>
+                        <button id="clear-btn" onclick="clearTerminal()">Clear</button>
+                    </div>
+                    <div class="button-row">
+                        <input type="text" id="package-input" placeholder="Package name (e.g., numpy, matplotlib)" />
+                        <button id="install-btn" onclick="installPackage()">Install Package</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.24.1/pyodide.js"></script>
     <script>
         let terminal = document.getElementById('terminal');
         let input = document.getElementById('code-input');
+        let runBtn = document.getElementById('run-btn');
+        let pyodide = null;
         
-        // Simple Python interpreter simulation
-        function runCode() {
+        // Initialize Pyodide
+        async function initPyodide() {
+            try {
+                terminal.innerHTML = "Loading Python interpreter... Please wait.";
+                pyodide = await loadPyodide();
+                
+                // Pre-install common packages
+                await pyodide.loadPackage(['numpy', 'matplotlib']);
+                
+                terminal.innerHTML = "Python interpreter ready! Try some code below.\n>>> ";
+                runBtn.disabled = false;
+                
+                // Setup stdout/stderr capture
+                pyodide.runPython(`
+import sys
+import io
+import contextlib
+
+class OutputCapture:
+    def __init__(self):
+        self.contents = []
+        
+    def write(self, data):
+        self.contents.append(data)
+        
+    def flush(self):
+        pass
+        
+    def get_contents(self):
+        return ''.join(self.contents)
+        
+    def clear(self):
+        self.contents = []
+
+_stdout_capture = OutputCapture()
+_stderr_capture = OutputCapture()
+`);
+                
+            } catch (error) {
+                terminal.innerHTML = `Error loading Python interpreter: ${error.message}\n>>> `;
+                console.error(error);
+            }
+        }
+        
+        // Run Python code
+        async function runCode() {
             let code = input.value.trim();
             if (!code) return;
             
@@ -198,36 +305,82 @@
             terminal.innerHTML += `${code}\n`;
             
             try {
-                // Simple evaluation for basic expressions
-                let result = eval(code);
-                terminal.innerHTML += `${result}\n>>> `;
-            } catch (error) {
-                // Handle some basic Python-like operations
-                if (code.includes('print(')) {
-                    let match = code.match(/print\((.*)\)/);
-                    if (match) {
-                        let content = match[1].replace(/['"]/g, '');
-                        terminal.innerHTML += `${content}\n>>> `;
-                    }
-                } else if (code.startsWith('import ')) {
-                    terminal.innerHTML += `Module imported successfully\n>>> `;
-                } else if (code.includes('=') && !code.includes('==')) {
-                    terminal.innerHTML += `Variable assigned\n>>> `;
-                } else {
-                    terminal.innerHTML += `Error: ${error.message}\n>>> `;
+                // Capture output
+                pyodide.runPython(`
+_stdout_capture.clear()
+_stderr_capture.clear()
+sys.stdout = _stdout_capture
+sys.stderr = _stderr_capture
+`);
+                
+                // Execute the code
+                let result = pyodide.runPython(code);
+                
+                // Get captured output
+                let stdout = pyodide.runPython('_stdout_capture.get_contents()');
+                let stderr = pyodide.runPython('_stderr_capture.get_contents()');
+                
+                // Restore stdout/stderr
+                pyodide.runPython(`
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+`);
+                
+                // Display output
+                if (stdout) {
+                    terminal.innerHTML += stdout;
                 }
+                if (stderr) {
+                    terminal.innerHTML += `<span class="error">${stderr}</span>`;
+                }
+                
+                // Display result if not None
+                if (result !== undefined && result !== null) {
+                    terminal.innerHTML += `${result}\n`;
+                }
+                
+                terminal.innerHTML += ">>> ";
+                
+            } catch (error) {
+                terminal.innerHTML += `<span class="error">Error: ${error.message}</span>\n>>> `;
             }
             
             input.value = '';
             terminal.scrollTop = terminal.scrollHeight;
         }
         
-        // Allow Enter key to run code
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+        // Install package
+        async function installPackage() {
+            let packageName = document.getElementById('package-input').value.trim();
+            if (!packageName) return;
+            
+            terminal.innerHTML += `<span class="loading">Installing ${packageName}...</span>\n`;
+            
+            try {
+                await pyodide.loadPackage([packageName]);
+                terminal.innerHTML += `<span class="success">Successfully installed ${packageName}</span>\n>>> `;
+            } catch (error) {
+                terminal.innerHTML += `<span class="error">Failed to install ${packageName}: ${error.message}</span>\n>>> `;
+            }
+            
+            document.getElementById('package-input').value = '';
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Clear terminal
+        function clearTerminal() {
+            terminal.innerHTML = "Python interpreter ready! Try some code below.\n>>> ";
+        }
+        
+        // Allow Ctrl+Enter to run code
+        input.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
                 runCode();
             }
         });
+        
+        // Initialize when page loads
+        window.addEventListener('load', initPyodide);
     </script>
 </body>
 </html>
