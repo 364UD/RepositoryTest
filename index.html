@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python Interpreter</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 200px; font-family: monospace; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        #output { background: #f0f0f0; padding: 10px; white-space: pre-wrap; font-family: monospace; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .loading { background: #fff3cd; }
+        .ready { background: #d4edda; }
+    </style>
+</head>
+<body>
+    <h1>Python Interpreter</h1>
+    
+    <div id="status" class="status loading">Loading Python...</div>
+    
+    <textarea id="code" placeholder="Write Python code here...">print("Hello, World!")
+import math
+print(f"Square root of 16: {math.sqrt(16)}")
+</textarea>
+    
+    <br>
+    <button onclick="runCode()" id="runBtn" disabled>Run Code</button>
+    <button onclick="clearCode()">Clear</button>
+    
+    <h3>Output:</h3>
+    <div id="output">Python is loading...</div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script>
+        let pyodide = null;
+        
+        async function initPyodide() {
+            try {
+                pyodide = await loadPyodide();
+                
+                // Setup output capture
+                pyodide.runPython(`
+                    import sys
+                    class Output:
+                        def __init__(self):
+                            self.content = []
+                        def write(self, text):
+                            self.content.append(str(text))
+                        def flush(self):
+                            pass
+                        def get_content(self):
+                            return ''.join(self.content)
+                        def clear(self):
+                            self.content = []
+                    
+                    output = Output()
+                    sys.stdout = output
+                    sys.stderr = output
+                `);
+                
+                document.getElementById('status').className = 'status ready';
+                document.getElementById('status').textContent = 'Python ready!';
+                document.getElementById('runBtn').disabled = false;
+                document.getElementById('output').textContent = 'Ready to run Python code.';
+            } catch (error) {
+                document.getElementById('output').textContent = 'Error loading Python: ' + error.message;
+            }
+        }
+        
+        async function runCode() {
+            if (!pyodide) return;
+            
+            const code = document.getElementById('code').value;
+            const output = document.getElementById('output');
+            
+            try {
+                pyodide.runPython('output.clear()');
+                await pyodide.runPythonAsync(code);
+                const result = pyodide.runPython('output.get_content()');
+                output.textContent = result || 'Code executed (no output)';
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        function clearCode() {
+            document.getElementById('code').value = '';
+            document.getElementById('output').textContent = 'Code cleared.';
+        }
+        
+        // Load Python on page load
+        window.addEventListener('load', initPyodide);
+    </script>
+</body>
+</html>
